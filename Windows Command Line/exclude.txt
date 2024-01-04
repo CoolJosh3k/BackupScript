@@ -1,0 +1,5 @@
+*\temp\
+*\$RECYCLE.BIN\
+*\Recovery\
+*\.Trash-1000
+*\My Images Folder\Image.png
