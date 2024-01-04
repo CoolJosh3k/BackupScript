@@ -1,16 +1,16 @@
 Dependencies:
-openssl
-winrar
+OpenSSL
+WinRAR
 
 Dependencies for remote:
-gsutil
+gcloud tool
 
 Setup windows:
 * Create an enviroment path variable pointing to the folder containing openssl.exe
 * Create an enviroment path variable pointing to the folder containing Rar.exe
 
 Setup windows for remote:
-* Create an enviroment path variable pointing to the folder containing gsutil.cmd
+* Create an enviroment path variable pointing to the folder containing gcloud.cmd
 
 1. Replace the contents of "hash" with the output of
 	openssl passwd -6 -salt salt

@@ -78,8 +78,6 @@ set FromTime=0
 goto PerformBackup
 
 :DiffBackup
-set BackupTypeName=Diff
-
 :FromTimeEntry
 echo.
 echo Please enter timestamp of last full backup, in the format of YYYYMMDDHHMMSS:
@@ -90,6 +88,8 @@ if defined var (goto FromTimeMismatch)
 
 call :strlen FromTimeLength FromTime
 if not %FromTimeLength% == 14 (goto FromTimeMismatch)
+
+set BackupTypeName=Diff_%FromTime%
 
 goto PerformBackup
 
