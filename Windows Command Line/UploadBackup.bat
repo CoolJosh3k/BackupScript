@@ -2,7 +2,7 @@
 
 set "ArchiveFolder=%cd%\output\RemoteBackup"
 
-gsutil cp "%ArchiveFolder%\*.rar" "gs://regular_backups"
+gcloud storage cp "%ArchiveFolder%\*.rar" "gs://regular_backups"
 
 echo.
 echo Done!
