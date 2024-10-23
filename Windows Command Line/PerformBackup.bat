@@ -19,15 +19,28 @@ if /i %PlannedBackupDestination% == B (goto StartOutputFolderCreation) else (got
 rem Output folder creation
 if exist "%cd%\output\" (echo. & echo Output folder already exists!) else (goto CreateOutputFolder)
 echo.
-echo Do you wish to clear the previous output folder? Enter Y delete and continue.
+echo Do you wish to clear the previous output folder? Enter Y to clear and continue.
 set /p DeleteOutputFolder=
-if /i %DeleteOutputFolder% == Y (rmdir /s /q "%cd%\output") else (goto Finish)
+if /i %DeleteOutputFolder% == Y (rmdir /s /q "%cd%\output"
+	if errorlevel 1 (
+		echo.
+		echo Failed to delete output folder! Ending script.
+		goto Finish
+	)
+) else (goto Finish)
 echo.
-echo Previous output folder was deleted. Now creating new one and proceeding with backup script.
+echo Previous output folder was deleted. Now creating new one and proceeding with backup script...
 
 :CreateOutputFolder
 
 md "%cd%\output"
+if errorlevel 1 (
+	echo.
+	echo Failed to create the output folder! Ending script.
+	goto Finish
+)
+echo.
+echo Output folder created successfully.
 
 rem Grab the hash from the hash file in the current directory
 set /p HashFromFile= < hash
@@ -64,39 +77,50 @@ if not exist %DestinationDriveLetter%:\%BackupDestinationDriveCheckFile% (echo. 
 
 rem Set type
 echo.
-echo Is this a "full" backup or a "differential" backup?
+echo Is this a "full" backup, a "differential" or a "version" backup?
 :RequestBackupType
 echo.
-echo Please type either F for full, or D for differential:
+echo Please type either F for full, D for differential or V for version:
 set /p BackupType=
 if /i %BackupType% == F (goto FullBackup)
-if /i %BackupType% == D (goto DiffBackup) else (goto RequestBackupType)
+if /i %BackupType% == D (goto DiffBackup)
+if /i %BackupType% == V (goto VerBackup) else (goto RequestBackupType)
 
 :FullBackup
 set BackupTypeName=Full
 set FromTime=0
 goto PerformBackup
 
-:DiffBackup
 :FromTimeEntry
-echo.
-echo Please enter timestamp of last full backup, in the format of YYYYMMDDHHMMSS:
-set /p FromTime=
+set /p FromTime="%~1 (YYYYMMDDHHMMSS): "
 
-set "var="&for /f "delims=0123456789" %%i in ("%FromTime%") do set "var=%%i"
-if defined var (goto FromTimeMismatch)
+set "var=" & for /f "delims=0123456789" %%i in ("%FromTime%") do set "var=%%i"
+if defined var (
+	goto InvalidTimeFormat
+)
 
 call :strlen FromTimeLength FromTime
-if not %FromTimeLength% == 14 (goto FromTimeMismatch)
+if not %FromTimeLength% == 14 (
+	goto InvalidTimeFormat
+)
 
-set BackupTypeName=Diff_%FromTime%
+set BackupTypeName=%~2_%FromTime%
+exit /b
 
-goto PerformBackup
-
-:FromTimeMismatch
+:InvalidTimeFormat
 echo.
 echo Format mismatch! Please try again.
 goto FromTimeEntry
+
+:DiffBackup
+echo.
+call :FromTimeEntry "Please enter timestamp of last full backup" "Diff"
+goto PerformBackup
+
+:VerBackup
+echo.
+call :FromTimeEntry "Please enter timestamp of last version backup, or last full backup if no newer version backups exist" "Version"
+goto PerformBackup
 
 :PerformBackup
 
@@ -141,8 +165,6 @@ set BackupPassword=
 set BackupPasswordConfirmation=
 
 echo.
-echo Done!
-echo.
 
 title Done!
 
@@ -150,7 +172,7 @@ endlocal
 
 pause
 
-goto :eof
+exit
 
 :strlen <resultVar> <stringVar>
 (

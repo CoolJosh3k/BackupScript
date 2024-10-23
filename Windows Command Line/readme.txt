@@ -24,3 +24,5 @@ Setup windows for remote:
 4. For remote support modify the gsutil command in UploadBackup.bat as needed
 
 5. Run PerformBackup.bat and follow the prompts
+
+WARNING: if any files/folders are deleted/renamed a full backup is needed, otherwise restoration of files will incorrectly restore those previously deleted/named files/folders.
